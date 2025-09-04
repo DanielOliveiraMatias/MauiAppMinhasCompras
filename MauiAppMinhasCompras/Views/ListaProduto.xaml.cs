@@ -6,24 +6,20 @@ namespace MauiAppMinhasCompras.Views;
 public partial class ListaProduto : ContentPage
 {
     ObservableCollection<Produto> lista = new ObservableCollection<Produto>();
+
     public ListaProduto()
     {
-        try
-        {
-            InitializeComponent();
+        InitializeComponent();
 
-            lst_produtos.ItemsSource = lista;
-        }
-        catch (Exception ex)
-        {
-            DisplayAlert("Ops", ex.Message, "OK");
-        }
+        lst_produtos.ItemsSource = lista;
     }
 
-    protected override async void OnAppearing()
+    protected async override void OnAppearing()
     {
         try
         {
+            lista.Clear();
+
             List<Produto> tmp = await App.Db.GetAll();
 
             tmp.ForEach(i => lista.Add(i));
@@ -39,6 +35,7 @@ public partial class ListaProduto : ContentPage
         try
         {
             Navigation.PushAsync(new Views.NovoProduto());
+
         }
         catch (Exception ex)
         {
@@ -84,13 +81,12 @@ public partial class ListaProduto : ContentPage
     {
         try
         {
-            MenuItem selecionado = sender as MenuItem;
+            MenuItem selecinado = sender as MenuItem;
 
-            Produto p = selecionado.BindingContext as Produto;
+            Produto p = selecinado.BindingContext as Produto;
 
             bool confirm = await DisplayAlert(
-                "Tem Certeza?", $"Remover {p.Descricao}?", "Sim", "Não"
-                );
+                "Tem Certeza?", $"Remover {p.Descricao}?", "Sim", "Não");
 
             if (confirm)
             {
@@ -101,6 +97,23 @@ public partial class ListaProduto : ContentPage
         catch (Exception ex)
         {
             await DisplayAlert("Ops", ex.Message, "OK");
+        }
+    }
+
+    private void lst_produtos_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+    {
+        try
+        {
+            Produto p = e.SelectedItem as Produto;
+
+            Navigation.PushAsync(new Views.EditarProduto
+            {
+                BindingContext = p,
+            });
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert("Ops", ex.Message, "OK");
         }
     }
 }
